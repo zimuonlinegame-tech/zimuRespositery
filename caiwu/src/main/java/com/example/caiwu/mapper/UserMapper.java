@@ -1,4 +1,4 @@
-﻿package com.example.caiwu.mapper;
+package com.example.caiwu.mapper;
 
 import com.example.caiwu.dto.UserResponse;
 import com.example.caiwu.entity.Permission;
@@ -20,6 +20,7 @@ public final class UserMapper {
         response.setEnabled(user.isEnabled());
         response.setCreatedAt(user.getCreatedAt());
         response.setRoles(mapRoles(user.getRoles()));
+        response.setRoleDisplayNames(mapRoleDisplayNames(user.getRoles()));
         response.setPermissions(mapPermissions(user.getRoles()));
         return response;
     }
@@ -27,6 +28,12 @@ public final class UserMapper {
     private static Set<String> mapRoles(Set<Role> roles) {
         return roles.stream()
                 .map(Role::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private static Set<String> mapRoleDisplayNames(Set<Role> roles) {
+        return roles.stream()
+                .map(Role::getDisplayName)
                 .collect(Collectors.toSet());
     }
 

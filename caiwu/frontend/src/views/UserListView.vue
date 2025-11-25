@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div>
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
@@ -35,13 +35,13 @@
             <td>
               <span v-for="permission in user.permissions" :key="permission" class="badge" style="background-color:#fef3c7;color:#92400e;">{{ permission }}</span>
             </td>
-            <td>
+            <td style="text-align: center;">
               <span class="badge" :style="{ backgroundColor: user.enabled ? '#dcfce7' : '#fee2e2', color: user.enabled ? '#15803d' : '#b91c1c' }">
                 {{ user.enabled ? '启用' : '禁用' }}
               </span>
             </td>
             <td>{{ formatDate(user.createdAt) }}</td>
-            <td>
+            <td style="white-space: nowrap;">
               <button class="secondary-btn" @click="editUser(user)">编辑</button>
               <button class="secondary-btn" style="margin-left: 0.5rem; border-color:#dc2626;color:#dc2626;" @click="removeUser(user)">删除</button>
             </td>
@@ -58,40 +58,48 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top: 1.5rem;">
-      <h3>{{ editing ? '编辑用户' : '创建新用户' }}</h3>
-      <form @submit.prevent="submitForm" style="margin-top: 1rem;">
-        <div class="form-group">
-          <label>用户名</label>
-          <input v-model="form.username" :disabled="editing" required placeholder="唯一用户名" />
+    <!-- 创建/编辑用户模态框 -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editing ? '编辑用户' : '创建新用户' }}</h3>
+          <button class="close-btn" @click="closeModal">×</button>
         </div>
-        <div class="form-group">
-          <label>邮箱</label>
-          <input v-model="form.email" type="email" required placeholder="用户邮箱" />
+        <div class="modal-body">
+          <div v-if="error" class="alert alert-error" style="margin-bottom: 1rem;">{{ error }}</div>
+          <form @submit.prevent="submitForm">
+            <div class="form-group">
+              <label style="display: inline-block; width: 100px;">用户名</label>
+              <input v-model="form.username" :disabled="editing" required placeholder="唯一用户名" style="width: 250px;" />
+            </div>
+            <div class="form-group">
+              <label style="display: inline-block; width: 100px;">密码 {{ editing ? '(留空表示不修改)' : '' }}</label>
+              <input v-model="form.password" type="password" :required="!editing" minlength="6" placeholder="至少 6 位" style="width: 250px;" />
+            </div>
+            <div class="form-group">
+              <label style="display: inline-block; width: 100px;">邮箱</label>
+              <input v-model="form.email" type="email" placeholder="用户邮箱" style="width: 250px;" />
+            </div>
+            <div class="form-group">
+              <label>角色</label>
+              <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
+                <label v-for="role in availableRoles" :key="role.name" style="display:flex; align-items:center; gap:0.4rem;">
+                  <input type="checkbox" :value="role.name" v-model="form.roles" />
+                  {{ role.displayName }}
+                </label>
+              </div>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+              <label style="width: 100px; margin: 0;">启用状态</label>
+              <input type="checkbox" v-model="form.enabled" style="margin: 0;" />
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-top: 1.5rem;">
+              <button class="primary-btn" type="submit">{{ editing ? '保存修改' : '创建用户' }}</button>
+              <button type="button" class="secondary-btn" @click="closeModal">取消</button>
+            </div>
+          </form>
         </div>
-        <div class="form-group">
-          <label>密码 {{ editing ? '(留空表示不修改)' : '' }}</label>
-          <input v-model="form.password" type="password" :required="!editing" minlength="6" placeholder="至少 6 位" />
-        </div>
-        <div class="form-group">
-          <label>角色</label>
-          <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
-            <label v-for="role in availableRoles" :key="role" style="display:flex; align-items:center; gap:0.4rem;">
-              <input type="checkbox" :value="role" v-model="form.roles" />
-              {{ role }}
-            </label>
-          </div>
-        </div>
-        <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
-          <label>启用状态</label>
-          <input type="checkbox" v-model="form.enabled" />
-        </div>
-        <div style="display:flex; gap:0.5rem;">
-          <button class="primary-btn" type="submit">{{ editing ? '保存修改' : '创建用户' }}</button>
-          <button type="button" class="secondary-btn" @click="resetForm">重置</button>
-          <button v-if="editing" type="button" class="secondary-btn" @click="startCreate">取消编辑</button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -112,7 +120,8 @@ const error = ref('');
 const info = ref('');
 const editing = ref(false);
 const editingId = ref(null);
-const availableRoles = ['ADMIN', 'USER'];
+const showModal = ref(false);
+const availableRoles = ref([]);
 
 const form = reactive({
   username: '',
@@ -132,9 +141,29 @@ const resetForm = () => {
   editingId.value = null;
 };
 
+const closeModal = () => {
+  showModal.value = false;
+  resetForm();
+};
+
 const startCreate = () => {
   resetForm();
   info.value = '';
+  showModal.value = true;
+};
+
+const fetchRoles = async () => {
+  try {
+    const response = await api.get('/api/roles');
+    availableRoles.value = response.data.data;
+  } catch (e) {
+    console.error('加载角色失败:', e);
+    // 如果加载失败，使用默认角色
+    availableRoles.value = [
+      { name: 'ADMIN', displayName: '系统管理员' },
+      { name: 'USER', displayName: '普通用户' }
+    ];
+  }
 };
 
 const fetchUsers = async () => {
@@ -175,6 +204,7 @@ const editUser = (user) => {
   form.enabled = user.enabled;
   form.roles = [...user.roles];
   info.value = `正在编辑用户 ${user.username}`;
+  showModal.value = true;
 };
 
 const buildPayload = () => {
@@ -198,6 +228,8 @@ const submitForm = async () => {
     if (editing.value) {
       await api.put(`/api/users/${editingId.value}`, buildPayload());
       info.value = '用户更新成功';
+      closeModal();
+      fetchUsers();
     } else {
       const payload = { ...buildPayload(), username: form.username, password: form.password };
       if (!payload.password) {
@@ -206,9 +238,9 @@ const submitForm = async () => {
       }
       await api.post('/api/users', payload);
       info.value = '用户创建成功';
+      closeModal();
+      fetchUsers();
     }
-    resetForm();
-    fetchUsers();
   } catch (e) {
     error.value = e.response?.data?.message || '操作失败';
   }
@@ -233,6 +265,7 @@ const formatDate = (value) => {
 };
 
 onMounted(() => {
+  fetchRoles();
   if (authStore.isAuthenticated) {
     fetchUsers();
   }

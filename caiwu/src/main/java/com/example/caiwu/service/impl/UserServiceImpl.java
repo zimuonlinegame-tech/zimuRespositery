@@ -1,4 +1,4 @@
-﻿package com.example.caiwu.service.impl;
+package com.example.caiwu.service.impl;
 
 import com.example.caiwu.dto.PagedResponse;
 import com.example.caiwu.dto.UserCreateRequest;
@@ -11,6 +11,7 @@ import com.example.caiwu.repository.RoleRepository;
 import com.example.caiwu.repository.UserRepository;
 import com.example.caiwu.security.RbacConstants;
 import com.example.caiwu.service.UserService;
+import jakarta.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -24,10 +25,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
+@Validated
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -65,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse createUser(UserCreateRequest request) {
+    public UserResponse createUser(@Valid UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "用户名已存在");
         }
@@ -77,6 +80,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(request.isEnabled());
+        // 确保角色不为空且不包含空值，loadRoles已处理默认角色为ROLE_USER
         user.setRoles(loadRoles(request.getRoles()));
         return UserMapper.toResponse(userRepository.save(user));
     }
@@ -97,9 +101,7 @@ public class UserServiceImpl implements UserService {
         if (request.getEnabled() != null) {
             user.setEnabled(request.getEnabled());
         }
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            user.setRoles(loadRoles(request.getRoles()));
-        }
+        user.setRoles(loadRoles(request.getRoles()));
         return UserMapper.toResponse(userRepository.save(user));
     }
 

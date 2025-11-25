@@ -1,4 +1,4 @@
-﻿package com.example.caiwu.config;
+package com.example.caiwu.config;
 
 import com.example.caiwu.entity.Menu;
 import com.example.caiwu.entity.Permission;
@@ -44,9 +44,10 @@ public class StartupDataLoader implements ApplicationRunner {
         Permission create = ensurePermission(RbacConstants.PERM_USER_CREATE);
         Permission update = ensurePermission(RbacConstants.PERM_USER_UPDATE);
         Permission delete = ensurePermission(RbacConstants.PERM_USER_DELETE);
+        Permission roleRead = ensurePermission(RbacConstants.PERM_ROLE_READ);
 
-        Role adminRole = ensureRole(RbacConstants.ROLE_ADMIN, Set.of(read, create, update, delete));
-        ensureRole(RbacConstants.ROLE_USER, Set.of(read));
+        Role adminRole = ensureRole(RbacConstants.ROLE_ADMIN, "系统管理员", Set.of(read, create, update, delete, roleRead));
+        ensureRole(RbacConstants.ROLE_USER, "普通用户", Set.of(read));
 
         userRepository.findByUsername("admin").orElseGet(() -> {
             User admin = new User();
@@ -66,14 +67,15 @@ public class StartupDataLoader implements ApplicationRunner {
                 .orElseGet(() -> permissionRepository.save(new Permission(name)));
     }
 
-    private Role ensureRole(String name, Set<Permission> permissions) {
+    private Role ensureRole(String name, String displayName, Set<Permission> permissions) {
         return roleRepository.findByNameIgnoreCase(name)
                 .map(role -> {
+                    role.setDisplayName(displayName);
                     role.setPermissions(permissions);
                     return roleRepository.save(role);
                 })
                 .orElseGet(() -> {
-                    Role role = new Role(name);
+                    Role role = new Role(name, displayName);
                     role.setPermissions(permissions);
                     return roleRepository.save(role);
                 });

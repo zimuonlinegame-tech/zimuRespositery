@@ -1,4 +1,4 @@
-﻿package com.example.caiwu.entity;
+package com.example.caiwu.entity;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
@@ -16,6 +16,9 @@ public class Role {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
+    @Column(name = "display_name", nullable = false, length = 100)
+    private String displayName;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),
@@ -25,8 +28,9 @@ public class Role {
     protected Role() {
     }
 
-    public Role(String name) {
+    public Role(String name, String displayName) {
         this.name = name;
+        this.displayName = displayName;
     }
 
     public Long getId() {
@@ -58,6 +62,14 @@ public class Role {
 
     public void addPermission(Permission permission) {
         this.permissions.add(permission);
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

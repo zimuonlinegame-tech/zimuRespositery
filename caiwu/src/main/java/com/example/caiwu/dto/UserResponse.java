@@ -1,4 +1,4 @@
-﻿package com.example.caiwu.dto;
+package com.example.caiwu.dto;
 
 import java.time.Instant;
 import java.util.Set;
@@ -10,6 +10,7 @@ public class UserResponse {
     private boolean enabled;
     private Instant createdAt;
     private Set<String> roles;
+    private Set<String> roleDisplayNames;
     private Set<String> permissions;
 
     public Long getId() {
@@ -58,6 +59,14 @@ public class UserResponse {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public Set<String> getRoleDisplayNames() {
+        return roleDisplayNames;
+    }
+
+    public void setRoleDisplayNames(Set<String> roleDisplayNames) {
+        this.roleDisplayNames = roleDisplayNames;
     }
 
     public Set<String> getPermissions() {

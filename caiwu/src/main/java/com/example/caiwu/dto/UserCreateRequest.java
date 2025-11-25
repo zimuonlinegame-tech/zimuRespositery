@@ -1,9 +1,10 @@
-﻿package com.example.caiwu.dto;
+package com.example.caiwu.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import java.util.Set;
+import java.util.List;
 
 public class UserCreateRequest {
 
@@ -20,7 +21,8 @@ public class UserCreateRequest {
 
     private boolean enabled = true;
 
-    private Set<String> roles;
+    @NotEmpty(message = "角色不能为空")
+    private List<String> roles;
 
     public String getUsername() {
         return username;
@@ -54,11 +56,11 @@ public class UserCreateRequest {
         this.enabled = enabled;
     }
 
-    public Set<String> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
 }

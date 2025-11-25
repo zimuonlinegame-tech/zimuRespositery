@@ -22,11 +22,6 @@
           </nav>
         </aside>
         <main class="app-main">
-          <section v-if="isAuthenticated" class="alert alert-info">
-            当前用户：<strong>{{ currentUser?.username }}</strong>（角色：
-            <span v-for="role in currentUser?.roles" :key="role" class="badge">{{ role }}</span>
-            ）
-          </section>
           <RouterView />
         </main>
       </div>
