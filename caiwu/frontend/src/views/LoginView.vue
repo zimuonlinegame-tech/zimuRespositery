@@ -1,5 +1,5 @@
-﻿<template>
-  <div class="card" style="max-width: 420px; margin: 0 auto;">
+<template>
+  <div class="card" style="max-width: 420px; margin: 0 auto; padding: 2rem; box-sizing: border-box;">
     <h2>登录</h2>
     <p>使用管理员账号 admin / Admin@123 体验全部功能。</p>
     <div v-if="error" class="alert alert-error">{{ error }}</div>
