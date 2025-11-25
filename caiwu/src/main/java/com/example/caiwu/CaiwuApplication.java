@@ -1,9 +1,12 @@
-package com.example.caiwu;
+﻿package com.example.caiwu;
 
+import com.example.caiwu.config.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@SpringBootApplication
+@SpringBootApplication/*  */
+@EnableConfigurationProperties(JwtProperties.class)
 public class CaiwuApplication {
 
     public static void main(String[] args) {
