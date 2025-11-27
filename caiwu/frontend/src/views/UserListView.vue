@@ -29,7 +29,7 @@
           <tr v-for="user in users" :key="user.id">
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
-            <td>
+            <td style="white-space: normal;">
               <span v-for="role in user.roles" :key="role" class="badge">{{ role }}</span>
             </td>
             <td>
@@ -80,9 +80,9 @@
               <label style="display: inline-block; width: 100px;">邮箱</label>
               <input v-model="form.email" type="email" placeholder="用户邮箱" style="width: 250px;" />
             </div>
-            <div class="form-group">
-              <label>角色</label>
-              <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+              <label style="width: 100px; margin: 0; display: inline-block;">角色</label>
+              <div style="display:flex; gap: 1rem; width: 300px;">
                 <label v-for="role in availableRoles" :key="role.name" style="display:flex; align-items:center; gap:0.4rem;">
                   <input type="checkbox" :value="role.name" v-model="form.roles" />
                   {{ role.displayName }}
@@ -90,8 +90,8 @@
               </div>
             </div>
             <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
-              <label style="width: 100px; margin: 0;">启用状态</label>
-              <input type="checkbox" v-model="form.enabled" style="margin: 0;" />
+              <label style="width: 100px; margin: 0; display: inline-block;">启用状态</label>
+              <input type="checkbox" v-model="form.enabled" style="margin: 0; width: auto;" />
             </div>
             <div style="display:flex; gap:0.5rem; margin-top: 1.5rem;">
               <button class="primary-btn" type="submit">{{ editing ? '保存修改' : '创建用户' }}</button>
